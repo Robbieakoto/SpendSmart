@@ -1,4 +1,4 @@
-# SpendWise - Budget Tracker
+# SpendSmart - Budget Tracker
 
 A mobile-first budget tracking app built with React and Vite.
 
