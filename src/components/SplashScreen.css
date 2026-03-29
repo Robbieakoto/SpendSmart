@@ -1,0 +1,99 @@
+.splash-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(160deg, #009a76 0%, #00c1a3 50%, #007a5e 100%);
+  animation: splashFadeOut 0.5s ease-in-out forwards;
+  animation-play-state: paused;
+}
+
+.splash-screen.hiding {
+  animation-play-state: running;
+}
+
+@keyframes splashFadeOut {
+  from { opacity: 1; transform: scale(1); }
+  to   { opacity: 0; transform: scale(1.04); }
+}
+
+/* Icon */
+.splash-icon {
+  width: 120px;
+  height: 120px;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 28px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18), 0 2px 8px rgba(0, 0, 0, 0.1);
+  animation: splashIconPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.splash-icon img,
+.splash-icon svg {
+  width: 80px;
+  height: 80px;
+}
+
+@keyframes splashIconPop {
+  from { opacity: 0; transform: scale(0.6); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* App name */
+.splash-title {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: white;
+  letter-spacing: -0.5px;
+  margin: 0 0 8px;
+  animation: splashSlideUp 0.5s ease 0.2s both;
+}
+
+.splash-title span {
+  color: rgba(255, 255, 255, 0.75);
+  font-weight: 400;
+}
+
+/* Tagline */
+.splash-tagline {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.75);
+  margin: 0 0 48px;
+  animation: splashSlideUp 0.5s ease 0.3s both;
+}
+
+@keyframes splashSlideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Loading dots */
+.splash-dots {
+  display: flex;
+  gap: 8px;
+  animation: splashSlideUp 0.5s ease 0.5s both;
+}
+
+.splash-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.6);
+  animation: dotBounce 1.2s ease-in-out infinite;
+}
+
+.splash-dot:nth-child(2) { animation-delay: 0.2s; }
+.splash-dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes dotBounce {
+  0%, 80%, 100% { transform: scale(0.7); opacity: 0.5; }
+  40%           { transform: scale(1.2); opacity: 1; }
+}

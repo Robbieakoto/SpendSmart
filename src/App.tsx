@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import './App.css'
+import SplashScreen from './components/SplashScreen'
 
 interface Category {
   id: number
@@ -15,6 +16,7 @@ interface Expense {
 }
 
 function App() {
+  const [showSplash, setShowSplash] = useState(true)
   const [categories, setCategories] = useState<Category[]>([])
   const [newCategory, setNewCategory] = useState('')
   const [newCategoryBudget, setNewCategoryBudget] = useState('')
@@ -123,6 +125,10 @@ function App() {
     } else {
       setSelectedMonth(selectedMonth + 1)
     }
+  }
+
+  if (showSplash) {
+    return <SplashScreen onDone={() => setShowSplash(false)} />
   }
 
   return (
