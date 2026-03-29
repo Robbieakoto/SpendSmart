@@ -1,0 +1,431 @@
+.app {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 0.75rem;
+  font-size: 16px;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', system-ui, sans-serif;
+  background: linear-gradient(135deg, #f0f7fb 0%, #f5eef8 50%, #fef5f5 100%);
+  background-attachment: fixed;
+}
+
+html {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.top-card {
+  background: linear-gradient(135deg, #009a76 0%, #00c1a3 100%);
+  border-radius: 20px;
+  color: #fff;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.month-title small {
+  opacity: 0.85;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.month-title h2 {
+  margin: 0.25rem 0 0.8rem;
+}
+
+.month-selector {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0.5rem 0;
+}
+
+.month-selector h2 {
+  margin: 0;
+  flex: 1;
+  text-align: center;
+  font-size: 1.5rem;
+}
+
+.month-nav {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: #fff;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.month-nav:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+
+.budget-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.budget-summary h1 {
+  margin: 0; 
+  font-size: 2rem;
+}
+
+.summary-cards {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.summary-card {
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 14px;
+  padding: 0.6rem 0.9rem;
+  min-width: 120px;
+}
+
+.summary-card p {
+  margin: 0;
+  opacity: 0.9;
+  font-size: 0.85rem;
+}
+
+.summary-card strong {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 1rem;
+}
+
+.progress-box {
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.progress-circle {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.progress-circle::before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.progress-fill {
+  position: absolute;
+  height: 8px;
+  width: 100%;
+  bottom: 10px;
+  left: 0;
+  background: #fff;
+  border-radius: 999px;
+}
+
+.progress-inner {
+  position: relative;
+  font-weight: 700;
+  color: #fff;
+}
+
+.tab-bar {
+  display: flex;
+  gap: 0.5rem;
+  margin: 1.5rem 0 1.2rem 0;
+  padding: 1rem 0.75rem;
+  overflow-x: auto;
+  padding-bottom: 0.75rem;
+  background: linear-gradient(90deg, rgba(0, 154, 118, 0.05) 0%, rgba(28, 202, 168, 0.05) 100%);
+  border-radius: 16px;
+  border: 1px solid rgba(0, 154, 118, 0.1);
+}
+
+.tab {
+  color: #2c2c2c;
+  border: 0;
+  background: #fff;
+  border-radius: 999px;
+  padding: 0.55rem 1rem;
+  box-shadow: 0 10px 25px rgba(50, 80, 90, 0.08);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
+}
+
+.tab:hover {
+  transform: translateY(-2px);
+}
+
+.tab.active {
+  background: linear-gradient(135deg, #009a76 0%, #00c1a3 100%);
+  border: 2px solid transparent;
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0, 154, 118, 0.25);
+}
+
+.section {
+  margin-bottom: 1.5rem;
+  text-align: left;
+  background: #fff;
+  border-radius: 16px;
+  padding: 1.25rem;
+  color: #121212;
+  box-shadow: 0 4px 15px rgba(0, 154, 118, 0.08);
+  border: 1px solid rgba(28, 202, 168, 0.1);
+}
+
+.section h3 {
+  margin-top: 0;
+  color: #009a76;
+  font-size: 1.15rem;
+  margin-bottom: 1rem;
+}
+
+.add-category, .add-expense {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.2rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, #f0f9f7 0%, #eef7fb 100%);
+  border-radius: 12px;
+  border: 1px solid rgba(0, 154, 118, 0.15);
+}
+
+input, select {
+  padding: 0.65rem;
+  font-size: 0.95rem;
+  border: 1px solid #d8e1ea;
+  border-radius: 10px;
+  min-width: 150px;
+}
+
+button {
+  padding: 0.7rem 1rem;
+  background: #009a76;
+  color: #fff;
+  border: 0;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+button:hover {
+  transform: translateY(-1px);
+}
+
+.category-list, .expenses {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.category-list li {
+  padding: 0.8rem;
+  border-bottom: 1px solid #eceff3;
+}
+
+.category-name {
+  font-weight: 700;
+  display: inline-block;
+}
+
+.category-values {
+  float: right;
+  font-weight: 600;
+}
+
+.line-progress {
+  height: 8px;
+  background: #eff3f7;
+  border-radius: 999px;
+  margin-top: 0.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.line-fill {
+  height: 100%;
+  background: #00a788;
+  border-radius: 999px;
+}
+
+.expenses li {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 0.5rem;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid #eceff3;
+}
+
+.empty-state {
+  text-align: center;
+  color: #999;
+  padding: 2rem 1rem;
+  font-size: 0.95rem;
+}
+
+.budget-details, .calendar-view {
+  width: 100%;
+}
+
+@media (max-width: 480px) {
+  .app {
+    padding: 0.75rem;
+    max-width: 100%;
+  }
+
+  .top-card {
+    padding: 1rem 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .month-selector h2 {
+    font-size: 1.25rem;
+  }
+
+  .month-nav {
+    width: 32px;
+    height: 32px;
+    font-size: 1rem;
+  }
+
+  .budget-summary {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .summary-cards {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .summary-card {
+    flex: 1;
+  }
+
+  .tab-bar {
+    overflow-x: auto;
+    gap: 0.4rem;
+  }
+
+  .tab {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.9rem;
+  }
+
+  .section {
+    padding: 0.8rem;
+    margin-bottom: 1rem;
+  }
+
+  .category-values {
+    display: block;
+    float: none;
+    margin-top: 0.25rem;
+    font-size: 0.9rem;
+  }
+
+  input, select {
+    flex: 1;
+    min-width: 100px;
+    font-size: 16px;
+  }
+
+  .add-category, .add-expense {
+    flex-direction: column;
+  }
+
+  button {
+    width: 100%;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+  .app {
+    max-width: 95vw;
+    padding: 1rem;
+  }
+
+  .top-card {
+    padding: 1.25rem;
+  }
+
+  .budget-summary {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .summary-cards {
+    flex-direction: row;
+  }
+
+  .section {
+    padding: 1rem 1.25rem;
+  }
+
+  input, select {
+    min-width: 120px;
+  }
+}
+
+@media (min-width: 769px) {
+  .app {
+    max-width: 600px;
+    padding: 1.5rem;
+  }
+
+  .top-card {
+    padding: 1.5rem;
+  }
+
+  .section {
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .category-values {
+    float: right;
+  }
+
+  input, select {
+    min-width: 180px;
+  }
+
+  button {
+    width: auto;
+  }
+}
