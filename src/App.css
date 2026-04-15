@@ -170,6 +170,16 @@ html {
   color: #fff;
   font-size: 1.1rem;
   letter-spacing: -0.5px;
+  transition: color 0.3s ease;
+}
+
+.progress-inner.status-warning {
+  color: #ffdb4d;
+}
+
+.progress-inner.status-danger {
+  color: #ffcccc; /* Soft red for better contrast on green */
+  text-shadow: 0 0 5px rgba(255, 92, 92, 0.4);
 }
 
 .used-label {
@@ -182,6 +192,30 @@ html {
   padding: 4px 12px;
   border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.percent-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin-right: 8px;
+  background: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #dcfce7;
+}
+
+.percent-tag.status-warning {
+  background: #fffbeb;
+  color: #d97706;
+  border: 1px solid #fef3c7;
+}
+
+.percent-tag.status-danger {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fee2e2;
 }
 
 .tab-bar {

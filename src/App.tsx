@@ -167,7 +167,7 @@ function App() {
         </div>
         <div className="progress-box">
           <div className={`progress-circle ${getStatusClass(actualPercentUsed)}`}>
-            <div className="progress-inner">{Math.round(actualPercentUsed)}%</div>
+            <div className={`progress-inner ${getStatusClass(actualPercentUsed)}`}>{Math.round(actualPercentUsed)}%</div>
             <div className="progress-fill" style={{ width: `${displayPercentUsed}%` }}></div>
           </div>
           <span className="used-label">Used</span>
@@ -176,7 +176,7 @@ function App() {
 
       <nav className="tab-bar">
         <button className={`tab ${activeTab === 'overview' ? 'active' : ''}`} onClick={() => setActiveTab('overview')}>Overview</button>
-        <button className={`tab ${activeTab === 'budgets' ? 'active' : ''}`} onClick={() => setActiveTab('budgets')}>Budgets</button>
+        <button className={`tab ${activeTab === 'budgets' ? 'active' : ''}`} onClick={() => setActiveTab('budgets')}>Analytics</button>
         <button className={`tab ${activeTab === 'expenses' ? 'active' : ''}`} onClick={() => setActiveTab('expenses')}>Expenses</button>
         <button className={`tab ${activeTab === 'calendar' ? 'active' : ''}`} onClick={() => setActiveTab('calendar')}>Calendar</button>
       </nav>
@@ -223,7 +223,7 @@ function App() {
 
       {activeTab === 'budgets' && (
         <section className="section">
-          <h3>Budget Overview</h3>
+          <h3>Spend Analytics</h3>
           <div className="budget-details">
             {categories.length === 0 ? (
               <p className="empty-state">No categories yet. Add one from the Overview tab.</p>
@@ -236,7 +236,12 @@ function App() {
                   return (
                     <li key={cat.id}>
                       <div className="category-name">🍔 {cat.name}</div>
-                      <div className="category-values">GHC {spent.toFixed(2)} / GHC {cat.budget.toFixed(2)}</div>
+                      <div className="category-values">
+                        <span className={`percent-tag ${getStatusClass(actualProgress)}`}>
+                          {Math.round(actualProgress)}%
+                        </span>
+                        GHC {spent.toFixed(2)} / GHC {cat.budget.toFixed(2)}
+                      </div>
                       <div className="line-progress">
                         <div 
                           className={`line-fill ${getStatusClass(actualProgress)}`} 
