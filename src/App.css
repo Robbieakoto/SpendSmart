@@ -150,12 +150,38 @@ html {
   left: 0;
   background: #fff;
   border-radius: 999px;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+  transition: background-color 0.3s ease, width 0.5s ease-out;
+}
+
+.status-warning .progress-fill {
+  background: #ffdb4d;
+  box-shadow: 0 0 12px rgba(255, 219, 77, 0.6);
+}
+
+.status-danger .progress-fill {
+  background: #ff5c5c;
+  box-shadow: 0 0 15px rgba(255, 92, 92, 0.7);
 }
 
 .progress-inner {
   position: relative;
-  font-weight: 700;
+  font-weight: 800;
   color: #fff;
+  font-size: 1.1rem;
+  letter-spacing: -0.5px;
+}
+
+.used-label {
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: 0.9;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 4px 12px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .tab-bar {
@@ -278,8 +304,17 @@ button:hover {
 
 .line-fill {
   height: 100%;
-  background: #00a788;
+  background: #00d2ad;
   border-radius: 999px;
+  transition: width 0.5s ease-out, background-color 0.3s ease;
+}
+
+.line-fill.status-warning {
+  background: #facc15;
+}
+
+.line-fill.status-danger {
+  background: #ff4d4d;
 }
 
 .expenses li {

@@ -102,7 +102,14 @@ function App() {
   const totalBudget = categories.reduce((sum, c) => sum + c.budget, 0)
   const totalExpenses = monthExpenses.reduce((sum, exp) => sum + exp.amount, 0)
   const totalLeft = Math.max(0, totalBudget - totalExpenses)
-  const percentUsed = totalBudget ? Math.min(100, (totalExpenses / totalBudget) * 100) : 0
+  const actualPercentUsed = totalBudget ? (totalExpenses / totalBudget) * 100 : 0
+  const displayPercentUsed = Math.min(100, actualPercentUsed)
+
+  const getStatusClass = (percent: number) => {
+    if (percent >= 100) return 'status-danger'
+    if (percent >= 80) return 'status-warning'
+    return 'status-safe'
+  }
 
   const spentByCategory = (categoryId: number) =>
     monthExpenses
@@ -159,11 +166,11 @@ function App() {
           </div>
         </div>
         <div className="progress-box">
-          <div className="progress-circle">
-            <div className="progress-inner">{Math.round(percentUsed)}%</div>
-            <div className="progress-fill" style={{ width: `${percentUsed}%` }}></div>
+          <div className={`progress-circle ${getStatusClass(actualPercentUsed)}`}>
+            <div className="progress-inner">{Math.round(actualPercentUsed)}%</div>
+            <div className="progress-fill" style={{ width: `${displayPercentUsed}%` }}></div>
           </div>
-          <span>Used</span>
+          <span className="used-label">Used</span>
         </div>
       </header>
 
@@ -195,13 +202,17 @@ function App() {
           <ul className="category-list">
             {categories.map((cat) => {
               const spent = spentByCategory(cat.id)
-              const progress = cat.budget ? Math.min(100, (spent / cat.budget) * 100) : 0
+              const actualProgress = cat.budget ? (spent / cat.budget) * 100 : 0
+              const displayProgress = Math.min(100, actualProgress)
               return (
                 <li key={cat.id}>
                   <div className="category-name">🍔 {cat.name}</div>
                   <div className="category-values">GHC {spent.toFixed(2)} / GHC {cat.budget.toFixed(2)}</div>
                   <div className="line-progress">
-                    <div className="line-fill" style={{ width: `${progress}%` }} />
+                    <div 
+                      className={`line-fill ${getStatusClass(actualProgress)}`} 
+                      style={{ width: `${displayProgress}%` }} 
+                    />
                   </div>
                 </li>
               )
@@ -220,13 +231,17 @@ function App() {
               <ul className="category-list">
                 {categories.map((cat) => {
                   const spent = spentByCategory(cat.id)
-                  const progress = cat.budget ? Math.min(100, (spent / cat.budget) * 100) : 0
+                  const actualProgress = cat.budget ? (spent / cat.budget) * 100 : 0
+                  const displayProgress = Math.min(100, actualProgress)
                   return (
                     <li key={cat.id}>
                       <div className="category-name">🍔 {cat.name}</div>
                       <div className="category-values">GHC {spent.toFixed(2)} / GHC {cat.budget.toFixed(2)}</div>
                       <div className="line-progress">
-                        <div className="line-fill" style={{ width: `${progress}%` }} />
+                        <div 
+                          className={`line-fill ${getStatusClass(actualProgress)}`} 
+                          style={{ width: `${displayProgress}%` }} 
+                        />
                       </div>
                     </li>
                   )
