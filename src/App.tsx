@@ -37,6 +37,15 @@ function App() {
     return saved || 'overview'
   })
 
+  const [expensesPage, setExpensesPage] = useState(1)
+  const [calendarPage, setCalendarPage] = useState(1)
+  const ITEMS_PER_PAGE = 10
+
+  useEffect(() => {
+    setExpensesPage(1)
+    setCalendarPage(1)
+  }, [selectedMonth, selectedYear])
+
   useEffect(() => {
     const savedCategories = localStorage.getItem('categories')
     const savedExpenses = localStorage.getItem('expenses')
@@ -299,26 +308,52 @@ function App() {
           <div className="expenses-list-container">
             {monthExpenses.length === 0 ? (
               <p className="empty-state">No expenses yet. Add one above.</p>
-            ) : (
-              Object.entries(groupExpensesByDate(monthExpenses))
-                .sort(([dateA], [dateB]) => new Date(dateB).getTime() - new Date(dateA).getTime())
-                .map(([date, group]) => (
-                  <div key={date} className="expense-group">
-                    <div className="date-header">{new Date(date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</div>
-                    <ul className="expenses">
-                      {group.map((exp) => {
-                        const category = categories.find((c) => c.id === exp.categoryId)
-                        return (
-                          <li key={exp.id}>
-                            <span className="exp-cat">{category?.name ?? 'Unknown'}</span>
-                            <span className="exp-amt">GHC {exp.amount.toFixed(2)}</span>
-                          </li>
-                        )
-                      })}
-                    </ul>
-                  </div>
-                ))
-            )}
+            ) : (() => {
+              const grouped = Object.entries(groupExpensesByDate(monthExpenses))
+                .sort(([dateA], [dateB]) => new Date(dateB).getTime() - new Date(dateA).getTime());
+              const totalPages = Math.ceil(grouped.length / ITEMS_PER_PAGE);
+              const paginated = grouped.slice((expensesPage - 1) * ITEMS_PER_PAGE, expensesPage * ITEMS_PER_PAGE);
+              
+              return (
+                <>
+                  {paginated.map(([date, group]) => (
+                    <div key={date} className="expense-group">
+                      <div className="date-header">{new Date(date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</div>
+                      <ul className="expenses">
+                        {group.map((exp) => {
+                          const category = categories.find((c) => c.id === exp.categoryId)
+                          return (
+                            <li key={exp.id}>
+                              <span className="exp-cat">{category?.name ?? 'Unknown'}</span>
+                              <span className="exp-amt">GHC {exp.amount.toFixed(2)}</span>
+                            </li>
+                          )
+                        })}
+                      </ul>
+                    </div>
+                  ))}
+                  {totalPages > 1 && (
+                    <div className="pagination">
+                      <button 
+                        disabled={expensesPage === 1} 
+                        onClick={() => setExpensesPage(prev => prev - 1)}
+                        className="page-btn"
+                      >
+                        Prev
+                      </button>
+                      <span className="page-info">Page {expensesPage} of {totalPages}</span>
+                      <button 
+                        disabled={expensesPage === totalPages} 
+                        onClick={() => setExpensesPage(prev => prev + 1)}
+                        className="page-btn"
+                      >
+                        Next
+                      </button>
+                    </div>
+                  )}
+                </>
+              );
+            })()}
           </div>
         </section>
       )}
@@ -329,26 +364,52 @@ function App() {
           <div className="calendar-view">
             {monthExpenses.length === 0 ? (
               <p className="empty-state">No expenses to display.</p>
-            ) : (
-              Object.entries(groupExpensesByDate(monthExpenses))
-                .sort(([dateA], [dateB]) => new Date(dateB).getTime() - new Date(dateA).getTime())
-                .map(([date, group]) => (
-                  <div key={date} className="expense-group">
-                    <div className="date-header">{new Date(date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</div>
-                    <ul className="expenses">
-                      {group.map((exp) => {
-                        const category = categories.find((c) => c.id === exp.categoryId)
-                        return (
-                          <li key={exp.id}>
-                            <span className="exp-cat">{category?.name ?? 'Unknown'}</span>
-                            <span className="exp-amt">GHC {exp.amount.toFixed(2)}</span>
-                          </li>
-                        )
-                      })}
-                    </ul>
-                  </div>
-                ))
-            )}
+            ) : (() => {
+              const grouped = Object.entries(groupExpensesByDate(monthExpenses))
+                .sort(([dateA], [dateB]) => new Date(dateB).getTime() - new Date(dateA).getTime());
+              const totalPages = Math.ceil(grouped.length / ITEMS_PER_PAGE);
+              const paginated = grouped.slice((calendarPage - 1) * ITEMS_PER_PAGE, calendarPage * ITEMS_PER_PAGE);
+
+              return (
+                <>
+                  {paginated.map(([date, group]) => (
+                    <div key={date} className="expense-group">
+                      <div className="date-header">{new Date(date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</div>
+                      <ul className="expenses">
+                        {group.map((exp) => {
+                          const category = categories.find((c) => c.id === exp.categoryId)
+                          return (
+                            <li key={exp.id}>
+                              <span className="exp-cat">{category?.name ?? 'Unknown'}</span>
+                              <span className="exp-amt">GHC {exp.amount.toFixed(2)}</span>
+                            </li>
+                          )
+                        })}
+                      </ul>
+                    </div>
+                  ))}
+                  {totalPages > 1 && (
+                    <div className="pagination">
+                      <button 
+                        disabled={calendarPage === 1} 
+                        onClick={() => setCalendarPage(prev => prev - 1)}
+                        className="page-btn"
+                      >
+                        Prev
+                      </button>
+                      <span className="page-info">Page {calendarPage} of {totalPages}</span>
+                      <button 
+                        disabled={calendarPage === totalPages} 
+                        onClick={() => setCalendarPage(prev => prev + 1)}
+                        className="page-btn"
+                      >
+                        Next
+                      </button>
+                    </div>
+                  )}
+                </>
+              );
+            })()}
           </div>
         </section>
       )}
