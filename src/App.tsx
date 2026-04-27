@@ -116,6 +116,17 @@ function App() {
       .filter((exp) => exp.categoryId === categoryId)
       .reduce((sum, exp) => sum + exp.amount, 0)
 
+  const groupExpensesByDate = (expenses: Expense[]) => {
+    const groups: { [key: string]: Expense[] } = {}
+    expenses.forEach((exp) => {
+      if (!groups[exp.date]) {
+        groups[exp.date] = []
+      }
+      groups[exp.date].push(exp)
+    })
+    return groups
+  }
+
   const goToPreviousMonth = () => {
     if (selectedMonth === 0) {
       setSelectedMonth(11)
@@ -285,22 +296,30 @@ function App() {
             />
             <button onClick={addExpense}>Add Expense</button>
           </div>
-          <ul className="expenses">
+          <div className="expenses-list-container">
             {monthExpenses.length === 0 ? (
-              <li className="empty-state">No expenses yet. Add one above.</li>
+              <p className="empty-state">No expenses yet. Add one above.</p>
             ) : (
-              monthExpenses.map((exp) => {
-                const category = categories.find((c) => c.id === exp.categoryId)
-                return (
-                  <li key={exp.id}>
-                    <span>{category?.name ?? 'Unknown'}</span>
-                    <span>GHC {exp.amount.toFixed(2)}</span>
-                    <span>{exp.date}</span>
-                  </li>
-                )
-              })
+              Object.entries(groupExpensesByDate(monthExpenses))
+                .sort(([dateA], [dateB]) => new Date(dateB).getTime() - new Date(dateA).getTime())
+                .map(([date, group]) => (
+                  <div key={date} className="expense-group">
+                    <div className="date-header">{new Date(date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</div>
+                    <ul className="expenses">
+                      {group.map((exp) => {
+                        const category = categories.find((c) => c.id === exp.categoryId)
+                        return (
+                          <li key={exp.id}>
+                            <span className="exp-cat">{category?.name ?? 'Unknown'}</span>
+                            <span className="exp-amt">GHC {exp.amount.toFixed(2)}</span>
+                          </li>
+                        )
+                      })}
+                    </ul>
+                  </div>
+                ))
             )}
-          </ul>
+          </div>
         </section>
       )}
 
@@ -311,21 +330,24 @@ function App() {
             {monthExpenses.length === 0 ? (
               <p className="empty-state">No expenses to display.</p>
             ) : (
-              <ul className="expenses">
-                {monthExpenses
-                  .slice()
-                  .reverse()
-                  .map((exp) => {
-                    const category = categories.find((c) => c.id === exp.categoryId)
-                    return (
-                      <li key={exp.id}>
-                        <span>{exp.date}</span>
-                        <span>{category?.name ?? 'Unknown'}</span>
-                        <span>GHC {exp.amount.toFixed(2)}</span>
-                      </li>
-                    )
-                  })}
-              </ul>
+              Object.entries(groupExpensesByDate(monthExpenses))
+                .sort(([dateA], [dateB]) => new Date(dateB).getTime() - new Date(dateA).getTime())
+                .map(([date, group]) => (
+                  <div key={date} className="expense-group">
+                    <div className="date-header">{new Date(date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</div>
+                    <ul className="expenses">
+                      {group.map((exp) => {
+                        const category = categories.find((c) => c.id === exp.categoryId)
+                        return (
+                          <li key={exp.id}>
+                            <span className="exp-cat">{category?.name ?? 'Unknown'}</span>
+                            <span className="exp-amt">GHC {exp.amount.toFixed(2)}</span>
+                          </li>
+                        )
+                      })}
+                    </ul>
+                  </div>
+                ))
             )}
           </div>
         </section>
