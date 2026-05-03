@@ -156,12 +156,8 @@ function App() {
     return groups
   }
 
-  const isEditable = (dateString: string) => {
-    const today = new Date()
-    const current = new Date(today.getFullYear(), today.getMonth(), today.getDate())
-    const [year, month, day] = dateString.split('-').map(Number)
-    const expDate = new Date(year, month - 1, day)
-    const diffTime = current.getTime() - expDate.getTime()
+  const isEditable = (expenseId: number) => {
+    const diffTime = Date.now() - expenseId
     const diffDays = diffTime / (1000 * 60 * 60 * 24)
     return diffDays <= 2
   }
@@ -370,7 +366,7 @@ function App() {
                               ) : (
                                 <div className="exp-amt-container">
                                   <span className="exp-amt">GHC {exp.amount.toFixed(2)}</span>
-                                  {isEditable(exp.date) && (
+                                  {isEditable(exp.id) && (
                                     <button onClick={() => startEditingExpense(exp)} className="edit-btn">Edit</button>
                                   )}
                                 </div>
@@ -430,26 +426,7 @@ function App() {
                           return (
                             <li key={exp.id}>
                               <span className="exp-cat">{category?.name ?? 'Unknown'}</span>
-                              {editingExpenseId === exp.id ? (
-                                <span className="exp-edit">
-                                  <input 
-                                    type="number" 
-                                    value={editingExpenseAmount} 
-                                    onChange={(e) => setEditingExpenseAmount(e.target.value)} 
-                                    autoFocus
-                                    className="edit-amount-input"
-                                  />
-                                  <button onClick={() => saveEditedExpense(exp.id)} className="save-btn">Save</button>
-                                  <button onClick={cancelEditExpense} className="cancel-btn">Cancel</button>
-                                </span>
-                              ) : (
-                                <div className="exp-amt-container">
-                                  <span className="exp-amt">GHC {exp.amount.toFixed(2)}</span>
-                                  {isEditable(exp.date) && (
-                                    <button onClick={() => startEditingExpense(exp)} className="edit-btn">Edit</button>
-                                  )}
-                                </div>
-                              )}
+                              <span className="exp-amt">GHC {exp.amount.toFixed(2)}</span>
                             </li>
                           )
                         })}
