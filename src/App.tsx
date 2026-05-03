@@ -156,6 +156,16 @@ function App() {
     return groups
   }
 
+  const isEditable = (dateString: string) => {
+    const today = new Date()
+    const current = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+    const [year, month, day] = dateString.split('-').map(Number)
+    const expDate = new Date(year, month - 1, day)
+    const diffTime = current.getTime() - expDate.getTime()
+    const diffDays = diffTime / (1000 * 60 * 60 * 24)
+    return diffDays <= 2
+  }
+
   const goToPreviousMonth = () => {
     if (selectedMonth === 0) {
       setSelectedMonth(11)
@@ -360,7 +370,9 @@ function App() {
                               ) : (
                                 <div className="exp-amt-container">
                                   <span className="exp-amt">GHC {exp.amount.toFixed(2)}</span>
-                                  <button onClick={() => startEditingExpense(exp)} className="edit-btn">Edit</button>
+                                  {isEditable(exp.date) && (
+                                    <button onClick={() => startEditingExpense(exp)} className="edit-btn">Edit</button>
+                                  )}
                                 </div>
                               )}
                             </li>
@@ -433,7 +445,9 @@ function App() {
                               ) : (
                                 <div className="exp-amt-container">
                                   <span className="exp-amt">GHC {exp.amount.toFixed(2)}</span>
-                                  <button onClick={() => startEditingExpense(exp)} className="edit-btn">Edit</button>
+                                  {isEditable(exp.date) && (
+                                    <button onClick={() => startEditingExpense(exp)} className="edit-btn">Edit</button>
+                                  )}
                                 </div>
                               )}
                             </li>
