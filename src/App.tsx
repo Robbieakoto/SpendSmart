@@ -24,14 +24,11 @@ function App() {
   const [newExpense, setNewExpense] = useState({ categoryId: 0, amount: '', date: '' })
   
   const today = new Date()
-  const [selectedMonth, setSelectedMonth] = useState(() => {
-    const saved = localStorage.getItem('selectedMonth')
-    return saved !== null ? parseInt(saved) : today.getMonth()
-  })
-  const [selectedYear, setSelectedYear] = useState(() => {
-    const saved = localStorage.getItem('selectedYear')
-    return saved !== null ? parseInt(saved) : today.getFullYear()
-  })
+  const [selectedMonth, setSelectedMonth] = useState(today.getMonth())
+  const [selectedYear, setSelectedYear] = useState(today.getFullYear())
+  const [currentRealDate, setCurrentRealDate] = useState(today)
+  const [editingExpenseId, setEditingExpenseId] = useState<number | null>(null)
+  const [editingExpenseAmount, setEditingExpenseAmount] = useState('')
   const [activeTab, setActiveTab] = useState<'overview' | 'budgets' | 'expenses' | 'calendar'>(() => {
     const saved = localStorage.getItem('activeTab') as 'overview' | 'budgets' | 'expenses' | 'calendar' | null
     return saved || 'overview'
@@ -62,12 +59,16 @@ function App() {
   }, [expenses])
 
   useEffect(() => {
-    localStorage.setItem('selectedMonth', selectedMonth.toString())
-  }, [selectedMonth])
-
-  useEffect(() => {
-    localStorage.setItem('selectedYear', selectedYear.toString())
-  }, [selectedYear])
+    const interval = setInterval(() => {
+      const now = new Date()
+      if (now.getMonth() !== currentRealDate.getMonth() || now.getFullYear() !== currentRealDate.getFullYear()) {
+        setCurrentRealDate(now)
+        setSelectedMonth(now.getMonth())
+        setSelectedYear(now.getFullYear())
+      }
+    }, 60000)
+    return () => clearInterval(interval)
+  }, [currentRealDate])
 
   useEffect(() => {
     localStorage.setItem('activeTab', activeTab)
@@ -94,6 +95,25 @@ function App() {
       setExpenses([...expenses, expense])
       setNewExpense({ categoryId: 0, amount: '', date: '' })
     }
+  }
+
+  const startEditingExpense = (exp: Expense) => {
+    setEditingExpenseId(exp.id)
+    setEditingExpenseAmount(exp.amount.toString())
+  }
+
+  const saveEditedExpense = (id: number) => {
+    const amount = parseFloat(editingExpenseAmount)
+    if (!isNaN(amount) && amount > 0) {
+      setExpenses(expenses.map(e => e.id === id ? { ...e, amount } : e))
+    }
+    setEditingExpenseId(null)
+    setEditingExpenseAmount('')
+  }
+
+  const cancelEditExpense = () => {
+    setEditingExpenseId(null)
+    setEditingExpenseAmount('')
   }
 
   const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
@@ -325,7 +345,24 @@ function App() {
                           return (
                             <li key={exp.id}>
                               <span className="exp-cat">{category?.name ?? 'Unknown'}</span>
-                              <span className="exp-amt">GHC {exp.amount.toFixed(2)}</span>
+                              {editingExpenseId === exp.id ? (
+                                <span className="exp-edit">
+                                  <input 
+                                    type="number" 
+                                    value={editingExpenseAmount} 
+                                    onChange={(e) => setEditingExpenseAmount(e.target.value)} 
+                                    autoFocus
+                                    className="edit-amount-input"
+                                  />
+                                  <button onClick={() => saveEditedExpense(exp.id)} className="save-btn">Save</button>
+                                  <button onClick={cancelEditExpense} className="cancel-btn">Cancel</button>
+                                </span>
+                              ) : (
+                                <div className="exp-amt-container">
+                                  <span className="exp-amt">GHC {exp.amount.toFixed(2)}</span>
+                                  <button onClick={() => startEditingExpense(exp)} className="edit-btn">Edit</button>
+                                </div>
+                              )}
                             </li>
                           )
                         })}
@@ -381,7 +418,24 @@ function App() {
                           return (
                             <li key={exp.id}>
                               <span className="exp-cat">{category?.name ?? 'Unknown'}</span>
-                              <span className="exp-amt">GHC {exp.amount.toFixed(2)}</span>
+                              {editingExpenseId === exp.id ? (
+                                <span className="exp-edit">
+                                  <input 
+                                    type="number" 
+                                    value={editingExpenseAmount} 
+                                    onChange={(e) => setEditingExpenseAmount(e.target.value)} 
+                                    autoFocus
+                                    className="edit-amount-input"
+                                  />
+                                  <button onClick={() => saveEditedExpense(exp.id)} className="save-btn">Save</button>
+                                  <button onClick={cancelEditExpense} className="cancel-btn">Cancel</button>
+                                </span>
+                              ) : (
+                                <div className="exp-amt-container">
+                                  <span className="exp-amt">GHC {exp.amount.toFixed(2)}</span>
+                                  <button onClick={() => startEditingExpense(exp)} className="edit-btn">Edit</button>
+                                </div>
+                              )}
                             </li>
                           )
                         })}
