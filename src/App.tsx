@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, User } from 'firebase/auth'
-import { doc, getDoc, setDoc, updateDoc, onSnapshot } from 'firebase/firestore'
+import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore'
 import { auth, db } from './firebase'
 import './App.css'
 import SplashScreen from './components/SplashScreen'
@@ -34,7 +34,7 @@ function App() {
   const [newExpense, setNewExpense] = useState({ categoryId: 0, amount: '', date: '' })
   const [loans, setLoans] = useState<Loan[]>([])
   const [newLoan, setNewLoan] = useState({ name: '', amount: '' })
-  
+
   const [user, setUser] = useState<User | null>(null)
   const [authLoading, setAuthLoading] = useState(true)
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login')
@@ -46,7 +46,7 @@ function App() {
   const [isLocked, setIsLocked] = useState<boolean>(false)
   const [pinInput, setPinInput] = useState('')
   const [newAppPin, setNewAppPin] = useState('')
-  
+
   const today = new Date()
   const [selectedMonth, setSelectedMonth] = useState(today.getMonth())
   const [selectedYear, setSelectedYear] = useState(today.getFullYear())
@@ -72,7 +72,7 @@ function App() {
       if (u) {
         setUser(u)
         const userRef = doc(db, 'users', u.uid)
-        
+
         try {
           const snap = await getDoc(userRef)
           if (!snap.exists()) {
@@ -80,14 +80,14 @@ function App() {
             const localCat = JSON.parse(localStorage.getItem('categories') || '[]')
             const localExp = JSON.parse(localStorage.getItem('expenses') || '[]')
             const localLoans = JSON.parse(localStorage.getItem('loans') || '[]')
-            
+
             await setDoc(userRef, {
               categories: localCat,
               expenses: localExp,
               loans: localLoans
             })
           }
-          
+
           // Setup snapshot listener
           onSnapshot(userRef, (docSnap) => {
             const data = docSnap.data()
@@ -127,15 +127,15 @@ function App() {
         try {
           const response = await fetch('/?t=' + Date.now())
           const html = await response.text()
-          
+
           const parser = new DOMParser()
           const doc = parser.parseFromString(html, 'text/html')
           const newScripts = Array.from(doc.querySelectorAll('script[type="module"]')).map(s => s.getAttribute('src'))
           const currentScripts = Array.from(document.querySelectorAll('script[type="module"]')).map(s => s.getAttribute('src'))
-          
+
           // If there's a new script hash in the remote index.html, trigger a reload
           const hasUpdate = newScripts.length > 0 && newScripts.some(src => src && !currentScripts.includes(src))
-          
+
           if (hasUpdate) {
             window.location.reload()
           }
@@ -146,7 +146,7 @@ function App() {
     }
 
     document.addEventListener('visibilitychange', checkForUpdates)
-    
+
     // Optional: check on mount too
     checkForUpdates()
 
@@ -322,17 +322,17 @@ function App() {
           <h2>☁️ Cloud Sync</h2>
           <p>{authMode === 'login' ? 'Login to access your synced budget.' : 'Create an account to backup your data.'}</p>
           <div className="lock-form">
-            <input 
-              type="email" 
-              value={email} 
+            <input
+              type="email"
+              value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Email"
               className="pin-input"
               style={{ fontSize: '1rem', letterSpacing: 'normal' }}
             />
-            <input 
-              type="password" 
-              value={password} 
+            <input
+              type="password"
+              value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Password"
               className="pin-input"
@@ -341,8 +341,8 @@ function App() {
             {authError && <p style={{ color: '#ef4444', fontSize: '0.8rem', margin: 0 }}>{authError}</p>}
             <button onClick={handleAuth}>{authMode === 'login' ? 'Login' : 'Register'}</button>
           </div>
-          <button 
-            className="cancel-btn" 
+          <button
+            className="cancel-btn"
             style={{ marginTop: '1rem', background: 'transparent', color: '#666' }}
             onClick={() => setAuthMode(authMode === 'login' ? 'register' : 'login')}
           >
@@ -368,10 +368,10 @@ function App() {
           <h2>🔒 App Locked</h2>
           <p>Please enter your PIN to continue</p>
           <div className="lock-form">
-            <input 
-              type="password" 
-              maxLength={4} 
-              value={pinInput} 
+            <input
+              type="password"
+              maxLength={4}
+              value={pinInput}
               onChange={(e) => setPinInput(e.target.value)}
               placeholder="****"
               className="pin-input"
@@ -456,9 +456,9 @@ function App() {
                   <div className="category-name">🍔 {cat.name}</div>
                   <div className="category-values">GHC {spent.toFixed(2)} / GHC {cat.budget.toFixed(2)}</div>
                   <div className="line-progress">
-                    <div 
-                      className={`line-fill ${getStatusClass(actualProgress)}`} 
-                      style={{ width: `${displayProgress}%` }} 
+                    <div
+                      className={`line-fill ${getStatusClass(actualProgress)}`}
+                      style={{ width: `${displayProgress}%` }}
                     />
                   </div>
                 </li>
@@ -490,9 +490,9 @@ function App() {
                         GHC {spent.toFixed(2)} / GHC {cat.budget.toFixed(2)}
                       </div>
                       <div className="line-progress">
-                        <div 
-                          className={`line-fill ${getStatusClass(actualProgress)}`} 
-                          style={{ width: `${displayProgress}%` }} 
+                        <div
+                          className={`line-fill ${getStatusClass(actualProgress)}`}
+                          style={{ width: `${displayProgress}%` }}
                         />
                       </div>
                     </li>
@@ -540,7 +540,7 @@ function App() {
                 .sort(([dateA], [dateB]) => new Date(dateB).getTime() - new Date(dateA).getTime());
               const totalPages = Math.ceil(grouped.length / ITEMS_PER_PAGE);
               const paginated = grouped.slice((expensesPage - 1) * ITEMS_PER_PAGE, expensesPage * ITEMS_PER_PAGE);
-              
+
               return (
                 <>
                   {paginated.map(([date, group]) => (
@@ -554,10 +554,10 @@ function App() {
                               <span className="exp-cat">{category?.name ?? 'Unknown'}</span>
                               {editingExpenseId === exp.id ? (
                                 <span className="exp-edit">
-                                  <input 
-                                    type="number" 
-                                    value={editingExpenseAmount} 
-                                    onChange={(e) => setEditingExpenseAmount(e.target.value)} 
+                                  <input
+                                    type="number"
+                                    value={editingExpenseAmount}
+                                    onChange={(e) => setEditingExpenseAmount(e.target.value)}
                                     autoFocus
                                     className="edit-amount-input"
                                   />
@@ -580,16 +580,16 @@ function App() {
                   ))}
                   {totalPages > 1 && (
                     <div className="pagination">
-                      <button 
-                        disabled={expensesPage === 1} 
+                      <button
+                        disabled={expensesPage === 1}
                         onClick={() => setExpensesPage(prev => prev - 1)}
                         className="page-btn"
                       >
                         Prev
                       </button>
                       <span className="page-info">Page {expensesPage} of {totalPages}</span>
-                      <button 
-                        disabled={expensesPage === totalPages} 
+                      <button
+                        disabled={expensesPage === totalPages}
                         onClick={() => setExpensesPage(prev => prev + 1)}
                         className="page-btn"
                       >
@@ -636,16 +636,16 @@ function App() {
                   ))}
                   {totalPages > 1 && (
                     <div className="pagination">
-                      <button 
-                        disabled={calendarPage === 1} 
+                      <button
+                        disabled={calendarPage === 1}
                         onClick={() => setCalendarPage(prev => prev - 1)}
                         className="page-btn"
                       >
                         Prev
                       </button>
                       <span className="page-info">Page {calendarPage} of {totalPages}</span>
-                      <button 
-                        disabled={calendarPage === totalPages} 
+                      <button
+                        disabled={calendarPage === totalPages}
                         onClick={() => setCalendarPage(prev => prev + 1)}
                         className="page-btn"
                       >
@@ -728,7 +728,7 @@ function App() {
               <div className="settings-action">
                 <p>Set a 4-digit PIN to secure your app data.</p>
                 <div className="pin-setup">
-                  <input 
+                  <input
                     type="password"
                     maxLength={4}
                     value={newAppPin}
