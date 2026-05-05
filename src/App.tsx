@@ -15,6 +15,14 @@ interface Expense {
   date: string
 }
 
+interface Loan {
+  id: number
+  name: string
+  amount: number
+  date: string
+  isPaid: boolean
+}
+
 function App() {
   const [showSplash, setShowSplash] = useState(true)
   const [categories, setCategories] = useState<Category[]>([])
@@ -22,6 +30,8 @@ function App() {
   const [newCategoryBudget, setNewCategoryBudget] = useState('')
   const [expenses, setExpenses] = useState<Expense[]>([])
   const [newExpense, setNewExpense] = useState({ categoryId: 0, amount: '', date: '' })
+  const [loans, setLoans] = useState<Loan[]>([])
+  const [newLoan, setNewLoan] = useState({ name: '', amount: '', date: '' })
   
   const today = new Date()
   const [selectedMonth, setSelectedMonth] = useState(today.getMonth())
@@ -29,8 +39,8 @@ function App() {
   const [currentRealDate, setCurrentRealDate] = useState(today)
   const [editingExpenseId, setEditingExpenseId] = useState<number | null>(null)
   const [editingExpenseAmount, setEditingExpenseAmount] = useState('')
-  const [activeTab, setActiveTab] = useState<'overview' | 'budgets' | 'expenses' | 'calendar'>(() => {
-    const saved = localStorage.getItem('activeTab') as 'overview' | 'budgets' | 'expenses' | 'calendar' | null
+  const [activeTab, setActiveTab] = useState<'overview' | 'budgets' | 'expenses' | 'calendar' | 'loans'>(() => {
+    const saved = localStorage.getItem('activeTab') as 'overview' | 'budgets' | 'expenses' | 'calendar' | 'loans' | null
     return saved || 'overview'
   })
 
@@ -46,8 +56,10 @@ function App() {
   useEffect(() => {
     const savedCategories = localStorage.getItem('categories')
     const savedExpenses = localStorage.getItem('expenses')
+    const savedLoans = localStorage.getItem('loans')
     if (savedCategories) setCategories(JSON.parse(savedCategories))
     if (savedExpenses) setExpenses(JSON.parse(savedExpenses))
+    if (savedLoans) setLoans(JSON.parse(savedLoans))
   }, [])
 
   useEffect(() => {
@@ -57,6 +69,10 @@ function App() {
   useEffect(() => {
     localStorage.setItem('expenses', JSON.stringify(expenses))
   }, [expenses])
+
+  useEffect(() => {
+    localStorage.setItem('loans', JSON.stringify(loans))
+  }, [loans])
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -95,6 +111,24 @@ function App() {
       setExpenses([...expenses, expense])
       setNewExpense({ categoryId: 0, amount: '', date: '' })
     }
+  }
+
+  const addLoan = () => {
+    if (newLoan.name.trim() && newLoan.amount && newLoan.date) {
+      const loan: Loan = {
+        id: Date.now(),
+        name: newLoan.name.trim(),
+        amount: parseFloat(newLoan.amount),
+        date: newLoan.date,
+        isPaid: false
+      }
+      setLoans([...loans, loan])
+      setNewLoan({ name: '', amount: '', date: '' })
+    }
+  }
+
+  const markLoanPaid = (id: number) => {
+    setLoans(loans.map(loan => loan.id === id ? { ...loan, isPaid: true } : loan))
   }
 
   const startEditingExpense = (exp: Expense) => {
@@ -225,6 +259,7 @@ function App() {
         <button className={`tab ${activeTab === 'budgets' ? 'active' : ''}`} onClick={() => setActiveTab('budgets')}>Analytics</button>
         <button className={`tab ${activeTab === 'expenses' ? 'active' : ''}`} onClick={() => setActiveTab('expenses')}>Expenses</button>
         <button className={`tab ${activeTab === 'calendar' ? 'active' : ''}`} onClick={() => setActiveTab('calendar')}>Calendar</button>
+        <button className={`tab ${activeTab === 'loans' ? 'active' : ''}`} onClick={() => setActiveTab('loans')}>Loans</button>
       </nav>
 
       {activeTab === 'overview' && (
@@ -455,6 +490,56 @@ function App() {
                 </>
               );
             })()}
+          </div>
+        </section>
+      )}
+
+      {activeTab === 'loans' && (
+        <section className="section">
+          <h3>People Who Owe Me</h3>
+          <div className="add-loan">
+            <input
+              type="text"
+              value={newLoan.name}
+              onChange={(e) => setNewLoan({ ...newLoan, name: e.target.value })}
+              placeholder="Person's name"
+            />
+            <input
+              type="number"
+              value={newLoan.amount}
+              onChange={(e) => setNewLoan({ ...newLoan, amount: e.target.value })}
+              placeholder="Amount"
+            />
+            <input
+              type="date"
+              value={newLoan.date}
+              onChange={(e) => setNewLoan({ ...newLoan, date: e.target.value })}
+            />
+            <button onClick={addLoan}>Add Loan</button>
+          </div>
+          <div className="loans-list-container">
+            {loans.length === 0 ? (
+              <p className="empty-state">No one owes you money right now.</p>
+            ) : (
+              <ul className="loans-list expenses">
+                {loans.slice().sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map(loan => (
+                  <li key={loan.id} className={loan.isPaid ? 'loan-paid' : ''}>
+                    <div className="loan-info">
+                      <span className="exp-cat">{loan.name}</span>
+                      <span className="loan-date">{new Date(loan.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                    </div>
+                    <div className="exp-amt-container">
+                      <span className="exp-amt">GHC {loan.amount.toFixed(2)}</span>
+                      {!loan.isPaid ? (
+                        <button onClick={() => markLoanPaid(loan.id)} className="mark-paid-btn">Mark Paid</button>
+                      ) : (
+                        <span className="paid-badge">Paid</span>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </section>
       )}
