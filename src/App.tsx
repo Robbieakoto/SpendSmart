@@ -27,12 +27,21 @@ interface Loan {
 
 function App() {
   const [showSplash, setShowSplash] = useState(true)
-  const [categories, setCategories] = useState<Category[]>([])
+  const [categories, setCategories] = useState<Category[]>(() => {
+    const saved = localStorage.getItem('categories')
+    return saved ? JSON.parse(saved) : []
+  })
   const [newCategory, setNewCategory] = useState('')
   const [newCategoryBudget, setNewCategoryBudget] = useState('')
-  const [expenses, setExpenses] = useState<Expense[]>([])
+  const [expenses, setExpenses] = useState<Expense[]>(() => {
+    const saved = localStorage.getItem('expenses')
+    return saved ? JSON.parse(saved) : []
+  })
   const [newExpense, setNewExpense] = useState({ categoryId: 0, amount: '', date: '' })
-  const [loans, setLoans] = useState<Loan[]>([])
+  const [loans, setLoans] = useState<Loan[]>(() => {
+    const saved = localStorage.getItem('loans')
+    return saved ? JSON.parse(saved) : []
+  })
   const [newLoan, setNewLoan] = useState({ name: '', amount: '' })
 
   const [user, setUser] = useState<User | null>(null)
@@ -42,8 +51,8 @@ function App() {
   const [password, setPassword] = useState('')
   const [authError, setAuthError] = useState('')
 
-  const [appPin, setAppPin] = useState<string | null>(null)
-  const [isLocked, setIsLocked] = useState<boolean>(false)
+  const [appPin, setAppPin] = useState<string | null>(() => localStorage.getItem('appPin'))
+  const [isLocked, setIsLocked] = useState<boolean>(() => !!localStorage.getItem('appPin'))
   const [pinInput, setPinInput] = useState('')
   const [newAppPin, setNewAppPin] = useState('')
 
@@ -107,6 +116,18 @@ function App() {
     })
     return () => unsubscribe()
   }, [])
+
+  useEffect(() => {
+    localStorage.setItem('categories', JSON.stringify(categories))
+  }, [categories])
+
+  useEffect(() => {
+    localStorage.setItem('expenses', JSON.stringify(expenses))
+  }, [expenses])
+
+  useEffect(() => {
+    localStorage.setItem('loans', JSON.stringify(loans))
+  }, [loans])
 
   useEffect(() => {
     const interval = setInterval(() => {
