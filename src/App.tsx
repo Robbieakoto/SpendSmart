@@ -85,6 +85,41 @@ function App() {
     return () => clearInterval(interval)
   }, [currentRealDate])
 
+  // Check for app updates automatically when the app becomes visible
+  useEffect(() => {
+    const checkForUpdates = async () => {
+      if (document.visibilityState === 'visible') {
+        try {
+          const response = await fetch('/?t=' + Date.now())
+          const html = await response.text()
+          
+          const parser = new DOMParser()
+          const doc = parser.parseFromString(html, 'text/html')
+          const newScripts = Array.from(doc.querySelectorAll('script[type="module"]')).map(s => s.getAttribute('src'))
+          const currentScripts = Array.from(document.querySelectorAll('script[type="module"]')).map(s => s.getAttribute('src'))
+          
+          // If there's a new script hash in the remote index.html, trigger a reload
+          const hasUpdate = newScripts.length > 0 && newScripts.some(src => src && !currentScripts.includes(src))
+          
+          if (hasUpdate) {
+            window.location.reload()
+          }
+        } catch (error) {
+          // Ignore network errors for background update checks
+        }
+      }
+    }
+
+    document.addEventListener('visibilitychange', checkForUpdates)
+    
+    // Optional: check on mount too
+    checkForUpdates()
+
+    return () => {
+      document.removeEventListener('visibilitychange', checkForUpdates)
+    }
+  }, [])
+
   useEffect(() => {
     localStorage.setItem('activeTab', activeTab)
   }, [activeTab])

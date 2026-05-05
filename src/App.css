@@ -228,12 +228,6 @@ html {
   background: linear-gradient(90deg, rgba(0, 154, 118, 0.05) 0%, rgba(28, 202, 168, 0.05) 100%);
   border-radius: 16px;
   border: 1px solid rgba(0, 154, 118, 0.1);
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}
-
-.tab-bar::-webkit-scrollbar {
-  display: none;
 }
 
 .tab {
@@ -461,13 +455,11 @@ button:hover {
   .tab-bar {
     overflow-x: auto;
     gap: 0.4rem;
-    flex-wrap: nowrap;
   }
 
   .tab {
-    padding: 0.4rem 0.6rem;
-    font-size: 0.85rem;
-    flex-shrink: 0;
+    padding: 0.5rem 0.8rem;
+    font-size: 0.9rem;
   }
 
   .section {
