@@ -1,4 +1,7 @@
 import { useState, useEffect } from 'react'
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, User } from 'firebase/auth'
+import { doc, getDoc, setDoc, updateDoc, onSnapshot } from 'firebase/firestore'
+import { auth, db } from './firebase'
 import './App.css'
 import SplashScreen from './components/SplashScreen'
 
@@ -32,14 +35,26 @@ function App() {
   const [loans, setLoans] = useState<Loan[]>([])
   const [newLoan, setNewLoan] = useState({ name: '', amount: '' })
   
+  const [user, setUser] = useState<User | null>(null)
+  const [authLoading, setAuthLoading] = useState(true)
+  const [authMode, setAuthMode] = useState<'login' | 'register'>('login')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [authError, setAuthError] = useState('')
+
+  const [appPin, setAppPin] = useState<string | null>(null)
+  const [isLocked, setIsLocked] = useState<boolean>(false)
+  const [pinInput, setPinInput] = useState('')
+  const [newAppPin, setNewAppPin] = useState('')
+  
   const today = new Date()
   const [selectedMonth, setSelectedMonth] = useState(today.getMonth())
   const [selectedYear, setSelectedYear] = useState(today.getFullYear())
   const [currentRealDate, setCurrentRealDate] = useState(today)
   const [editingExpenseId, setEditingExpenseId] = useState<number | null>(null)
   const [editingExpenseAmount, setEditingExpenseAmount] = useState('')
-  const [activeTab, setActiveTab] = useState<'overview' | 'budgets' | 'expenses' | 'calendar' | 'loans'>(() => {
-    const saved = localStorage.getItem('activeTab') as 'overview' | 'budgets' | 'expenses' | 'calendar' | 'loans' | null
+  const [activeTab, setActiveTab] = useState<'overview' | 'budgets' | 'expenses' | 'calendar' | 'loans' | 'settings'>(() => {
+    const saved = localStorage.getItem('activeTab') as 'overview' | 'budgets' | 'expenses' | 'calendar' | 'loans' | 'settings' | null
     return saved || 'overview'
   })
 
@@ -53,25 +68,45 @@ function App() {
   }, [selectedMonth, selectedYear])
 
   useEffect(() => {
-    const savedCategories = localStorage.getItem('categories')
-    const savedExpenses = localStorage.getItem('expenses')
-    const savedLoans = localStorage.getItem('loans')
-    if (savedCategories) setCategories(JSON.parse(savedCategories))
-    if (savedExpenses) setExpenses(JSON.parse(savedExpenses))
-    if (savedLoans) setLoans(JSON.parse(savedLoans))
+    const unsubscribe = onAuthStateChanged(auth, async (u) => {
+      if (u) {
+        setUser(u)
+        const userRef = doc(db, 'users', u.uid)
+        
+        try {
+          const snap = await getDoc(userRef)
+          if (!snap.exists()) {
+            // First time login - perform migration from local storage
+            const localCat = JSON.parse(localStorage.getItem('categories') || '[]')
+            const localExp = JSON.parse(localStorage.getItem('expenses') || '[]')
+            const localLoans = JSON.parse(localStorage.getItem('loans') || '[]')
+            
+            await setDoc(userRef, {
+              categories: localCat,
+              expenses: localExp,
+              loans: localLoans
+            })
+          }
+          
+          // Setup snapshot listener
+          onSnapshot(userRef, (docSnap) => {
+            const data = docSnap.data()
+            if (data) {
+              setCategories(data.categories || [])
+              setExpenses(data.expenses || [])
+              setLoans(data.loans || [])
+            }
+          })
+        } catch (error) {
+          console.error("Error setting up user data:", error)
+        }
+      } else {
+        setUser(null)
+      }
+      setAuthLoading(false)
+    })
+    return () => unsubscribe()
   }, [])
-
-  useEffect(() => {
-    localStorage.setItem('categories', JSON.stringify(categories))
-  }, [categories])
-
-  useEffect(() => {
-    localStorage.setItem('expenses', JSON.stringify(expenses))
-  }, [expenses])
-
-  useEffect(() => {
-    localStorage.setItem('loans', JSON.stringify(loans))
-  }, [loans])
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -124,11 +159,19 @@ function App() {
     localStorage.setItem('activeTab', activeTab)
   }, [activeTab])
 
+  const syncToCloud = async (updates: any) => {
+    if (user) {
+      await setDoc(doc(db, 'users', user.uid), updates, { merge: true })
+    }
+  }
+
   const addCategory = () => {
     const name = newCategory.trim()
     const budget = parseFloat(newCategoryBudget)
     if (name && !categories.some((c) => c.name.toLowerCase() === name.toLowerCase()) && budget > 0) {
-      setCategories([...categories, { id: Date.now(), name, budget }])
+      const newCats = [...categories, { id: Date.now(), name, budget }]
+      setCategories(newCats)
+      syncToCloud({ categories: newCats })
       setNewCategory('')
       setNewCategoryBudget('')
     }
@@ -142,7 +185,9 @@ function App() {
         amount: parseFloat(newExpense.amount),
         date: newExpense.date,
       }
-      setExpenses([...expenses, expense])
+      const newExps = [...expenses, expense]
+      setExpenses(newExps)
+      syncToCloud({ expenses: newExps })
       setNewExpense({ categoryId: 0, amount: '', date: '' })
     }
   }
@@ -155,13 +200,17 @@ function App() {
         amount: parseFloat(newLoan.amount),
         isPaid: false
       }
-      setLoans([...loans, loan])
+      const newLns = [...loans, loan]
+      setLoans(newLns)
+      syncToCloud({ loans: newLns })
       setNewLoan({ name: '', amount: '' })
     }
   }
 
   const markLoanPaid = (id: number) => {
-    setLoans(loans.map(loan => loan.id === id ? { ...loan, isPaid: true } : loan))
+    const newLns = loans.map(loan => loan.id === id ? { ...loan, isPaid: true } : loan)
+    setLoans(newLns)
+    syncToCloud({ loans: newLns })
   }
 
   const startEditingExpense = (exp: Expense) => {
@@ -172,7 +221,9 @@ function App() {
   const saveEditedExpense = (id: number) => {
     const amount = parseFloat(editingExpenseAmount)
     if (!isNaN(amount) && amount > 0) {
-      setExpenses(expenses.map(e => e.id === id ? { ...e, amount } : e))
+      const newExps = expenses.map(e => e.id === id ? { ...e, amount } : e)
+      setExpenses(newExps)
+      syncToCloud({ expenses: newExps })
     }
     setEditingExpenseId(null)
     setEditingExpenseAmount('')
@@ -247,8 +298,89 @@ function App() {
     }
   }
 
-  if (showSplash) {
+  if (showSplash || authLoading) {
     return <SplashScreen onDone={() => setShowSplash(false)} />
+  }
+
+  if (!user) {
+    const handleAuth = async () => {
+      setAuthError('')
+      try {
+        if (authMode === 'login') {
+          await signInWithEmailAndPassword(auth, email, password)
+        } else {
+          await createUserWithEmailAndPassword(auth, email, password)
+        }
+      } catch (err: any) {
+        setAuthError(err.message)
+      }
+    }
+
+    return (
+      <div className="app lock-screen-container">
+        <div className="lock-card">
+          <h2>☁️ Cloud Sync</h2>
+          <p>{authMode === 'login' ? 'Login to access your synced budget.' : 'Create an account to backup your data.'}</p>
+          <div className="lock-form">
+            <input 
+              type="email" 
+              value={email} 
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Email"
+              className="pin-input"
+              style={{ fontSize: '1rem', letterSpacing: 'normal' }}
+            />
+            <input 
+              type="password" 
+              value={password} 
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password"
+              className="pin-input"
+              style={{ fontSize: '1rem', letterSpacing: 'normal' }}
+            />
+            {authError && <p style={{ color: '#ef4444', fontSize: '0.8rem', margin: 0 }}>{authError}</p>}
+            <button onClick={handleAuth}>{authMode === 'login' ? 'Login' : 'Register'}</button>
+          </div>
+          <button 
+            className="cancel-btn" 
+            style={{ marginTop: '1rem', background: 'transparent', color: '#666' }}
+            onClick={() => setAuthMode(authMode === 'login' ? 'register' : 'login')}
+          >
+            {authMode === 'login' ? 'Need an account? Register' : 'Have an account? Login'}
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  if (isLocked) {
+    const handleUnlock = () => {
+      if (pinInput === appPin) {
+        setIsLocked(false)
+        setPinInput('')
+      } else {
+        alert('Incorrect PIN')
+      }
+    }
+    return (
+      <div className="app lock-screen-container">
+        <div className="lock-card">
+          <h2>🔒 App Locked</h2>
+          <p>Please enter your PIN to continue</p>
+          <div className="lock-form">
+            <input 
+              type="password" 
+              maxLength={4} 
+              value={pinInput} 
+              onChange={(e) => setPinInput(e.target.value)}
+              placeholder="****"
+              className="pin-input"
+            />
+            <button onClick={handleUnlock}>Unlock</button>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -293,6 +425,7 @@ function App() {
         <button className={`tab ${activeTab === 'expenses' ? 'active' : ''}`} onClick={() => setActiveTab('expenses')}>Expenses</button>
         <button className={`tab ${activeTab === 'calendar' ? 'active' : ''}`} onClick={() => setActiveTab('calendar')}>Calendar</button>
         <button className={`tab ${activeTab === 'loans' ? 'active' : ''}`} onClick={() => setActiveTab('loans')}>Loans</button>
+        <button className={`tab ${activeTab === 'settings' ? 'active' : ''}`} onClick={() => setActiveTab('settings')}>Settings</button>
       </nav>
 
       {activeTab === 'overview' && (
@@ -566,6 +699,54 @@ function App() {
                   </li>
                 ))}
               </ul>
+            )}
+          </div>
+        </section>
+      )}
+
+      {activeTab === 'settings' && (
+        <section className="section">
+          <h3>Settings & Security</h3>
+          <div className="settings-card" style={{ marginBottom: '1rem' }}>
+            <h4>Cloud Account</h4>
+            <div className="settings-action">
+              <p>Logged in as: <strong>{user?.email}</strong></p>
+              <button onClick={() => signOut(auth)} className="cancel-btn">Logout</button>
+            </div>
+          </div>
+          <div className="settings-card">
+            <h4>App Lock (PIN)</h4>
+            {appPin ? (
+              <div className="settings-action">
+                <p>App lock is currently <strong>enabled</strong>.</p>
+                <button onClick={() => {
+                  setAppPin(null)
+                  localStorage.removeItem('appPin')
+                }} className="cancel-btn">Remove PIN</button>
+              </div>
+            ) : (
+              <div className="settings-action">
+                <p>Set a 4-digit PIN to secure your app data.</p>
+                <div className="pin-setup">
+                  <input 
+                    type="password"
+                    maxLength={4}
+                    value={newAppPin}
+                    onChange={(e) => setNewAppPin(e.target.value)}
+                    placeholder="Enter 4-digit PIN"
+                    className="pin-input"
+                  />
+                  <button onClick={() => {
+                    if (newAppPin.length >= 4) {
+                      setAppPin(newAppPin)
+                      localStorage.setItem('appPin', newAppPin)
+                      setNewAppPin('')
+                    } else {
+                      alert('PIN must be at least 4 digits')
+                    }
+                  }}>Set PIN</button>
+                </div>
+              </div>
             )}
           </div>
         </section>

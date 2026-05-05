@@ -673,3 +673,74 @@ button:hover {
   padding: 4px 8px;
   border-radius: 20px;
 }
+
+/* Lock Screen & Settings Styles */
+.lock-screen-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+.lock-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 2.5rem 2rem;
+  text-align: center;
+  color: #121212;
+  box-shadow: 0 10px 30px rgba(0, 154, 118, 0.15);
+  width: 90%;
+  max-width: 340px;
+}
+
+.lock-card h2 {
+  margin-top: 0;
+  color: #009a76;
+}
+
+.lock-card p {
+  color: #666;
+  margin-bottom: 1.5rem;
+}
+
+.lock-form, .pin-setup {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.pin-input {
+  font-size: 1.5rem;
+  letter-spacing: 0.5rem;
+  text-align: center;
+  padding: 0.8rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  transition: border-color 0.2s;
+}
+
+.pin-input:focus {
+  outline: none;
+  border-color: #009a76;
+}
+
+.settings-card {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 1.25rem;
+  border: 1px solid #e2e8f0;
+}
+
+.settings-card h4 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: #334155;
+  font-size: 1.05rem;
+}
+
+.settings-action p {
+  margin-top: 0;
+  color: #475569;
+  font-size: 0.95rem;
+  margin-bottom: 1rem;
+}
