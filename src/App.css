@@ -115,6 +115,24 @@ html {
   font-size: 1rem;
 }
 
+.summary-card.spent-card {
+  background: rgba(255, 92, 92, 0.2);
+  border: 1px solid rgba(255, 92, 92, 0.4);
+}
+
+.summary-card.spent-card p {
+  color: #ffcccc;
+}
+
+.summary-card.left-card {
+  background: rgba(255, 255, 255, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.summary-card.left-card p {
+  color: #e2e8f0;
+}
+
 .progress-box {
   margin-top: 1rem;
   display: flex;

@@ -400,11 +400,11 @@ function App() {
             <h1>GHC {totalBudget.toFixed(2)}</h1>
           </div>
           <div className="summary-cards">
-            <div className="summary-card">
+            <div className="summary-card spent-card">
               <p>Spent</p>
               <strong>GHC {totalExpenses.toFixed(2)}</strong>
             </div>
-            <div className="summary-card">
+            <div className="summary-card left-card">
               <p>Left</p>
               <strong>GHC {totalLeft.toFixed(2)}</strong>
             </div>
@@ -710,7 +710,7 @@ function App() {
           <div className="settings-card" style={{ marginBottom: '1rem' }}>
             <h4>Cloud Account</h4>
             <div className="settings-action">
-              <p>Logged in as: <strong>{user?.email}</strong></p>
+              <p>Logged in as: <strong style={{ wordBreak: 'break-all' }}>{user?.email}</strong></p>
               <button onClick={() => signOut(auth)} className="cancel-btn">Logout</button>
             </div>
           </div>
