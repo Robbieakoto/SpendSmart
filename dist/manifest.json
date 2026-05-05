@@ -1,0 +1,36 @@
+{
+  "name": "SpendSmart",
+  "short_name": "SpendSmart",
+  "description": "Track. Save. Thrive.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#009a76",
+  "theme_color": "#009a76",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
