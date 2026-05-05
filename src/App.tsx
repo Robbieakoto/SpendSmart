@@ -19,7 +19,6 @@ interface Loan {
   id: number
   name: string
   amount: number
-  date: string
   isPaid: boolean
 }
 
@@ -31,7 +30,7 @@ function App() {
   const [expenses, setExpenses] = useState<Expense[]>([])
   const [newExpense, setNewExpense] = useState({ categoryId: 0, amount: '', date: '' })
   const [loans, setLoans] = useState<Loan[]>([])
-  const [newLoan, setNewLoan] = useState({ name: '', amount: '', date: '' })
+  const [newLoan, setNewLoan] = useState({ name: '', amount: '' })
   
   const today = new Date()
   const [selectedMonth, setSelectedMonth] = useState(today.getMonth())
@@ -114,16 +113,15 @@ function App() {
   }
 
   const addLoan = () => {
-    if (newLoan.name.trim() && newLoan.amount && newLoan.date) {
+    if (newLoan.name.trim() && newLoan.amount) {
       const loan: Loan = {
         id: Date.now(),
         name: newLoan.name.trim(),
         amount: parseFloat(newLoan.amount),
-        date: newLoan.date,
         isPaid: false
       }
       setLoans([...loans, loan])
-      setNewLoan({ name: '', amount: '', date: '' })
+      setNewLoan({ name: '', amount: '' })
     }
   }
 
@@ -510,11 +508,6 @@ function App() {
               onChange={(e) => setNewLoan({ ...newLoan, amount: e.target.value })}
               placeholder="Amount"
             />
-            <input
-              type="date"
-              value={newLoan.date}
-              onChange={(e) => setNewLoan({ ...newLoan, date: e.target.value })}
-            />
             <button onClick={addLoan}>Add Loan</button>
           </div>
           <div className="loans-list-container">
@@ -522,11 +515,10 @@ function App() {
               <p className="empty-state">No one owes you money right now.</p>
             ) : (
               <ul className="loans-list expenses">
-                {loans.slice().sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map(loan => (
+                {loans.slice().sort((a, b) => b.id - a.id).map(loan => (
                   <li key={loan.id} className={loan.isPaid ? 'loan-paid' : ''}>
                     <div className="loan-info">
                       <span className="exp-cat">{loan.name}</span>
-                      <span className="loan-date">{new Date(loan.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
                     </div>
                     <div className="exp-amt-container">
                       <span className="exp-amt">GHC {loan.amount.toFixed(2)}</span>
