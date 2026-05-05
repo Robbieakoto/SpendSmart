@@ -683,12 +683,12 @@ button:hover {
 }
 
 .lock-card {
-  background: #fff;
+  background: transparent;
   border-radius: 20px;
   padding: 2.5rem 2rem;
   text-align: center;
   color: #121212;
-  box-shadow: 0 10px 30px rgba(0, 154, 118, 0.15);
+  box-shadow: none;
   width: 90%;
   max-width: 340px;
 }
