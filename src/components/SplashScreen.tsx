@@ -1,24 +1,8 @@
-import { useEffect, useState } from 'react'
 import './SplashScreen.css'
 
-interface SplashScreenProps {
-  onDone: () => void
-}
-
-export default function SplashScreen({ onDone }: SplashScreenProps) {
-  const [hiding, setHiding] = useState(false)
-
-  useEffect(() => {
-    const hideTimer = setTimeout(() => setHiding(true), 2200)
-    const doneTimer = setTimeout(() => onDone(), 2700)
-    return () => {
-      clearTimeout(hideTimer)
-      clearTimeout(doneTimer)
-    }
-  }, [onDone])
-
+export default function SplashScreen() {
   return (
-    <div className={`splash-screen${hiding ? ' hiding' : ''}`}>
+    <div className="splash-screen">
       <div className="splash-icon">
         <img src="/icon.svg" alt="SpendSmart logo" />
       </div>

@@ -26,7 +26,7 @@ interface Loan {
 }
 
 function App() {
-  const [showSplash, setShowSplash] = useState(true)
+
   const [categories, setCategories] = useState<Category[]>(() => {
     const saved = localStorage.getItem('categories')
     return saved ? JSON.parse(saved) : []
@@ -167,9 +167,6 @@ function App() {
     }
 
     document.addEventListener('visibilitychange', checkForUpdates)
-
-    // Optional: check on mount too
-    checkForUpdates()
 
     return () => {
       document.removeEventListener('visibilitychange', checkForUpdates)
@@ -319,8 +316,8 @@ function App() {
     }
   }
 
-  if (showSplash || authLoading) {
-    return <SplashScreen onDone={() => setShowSplash(false)} />
+  if (authLoading) {
+    return <SplashScreen />
   }
 
   if (!user) {
