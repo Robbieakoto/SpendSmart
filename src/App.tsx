@@ -80,12 +80,13 @@ function App() {
     const unsubscribe = onAuthStateChanged(auth, async (u) => {
       if (u) {
         setUser(u)
-        const userRef = doc(db, 'users', u.uid)
+        setAuthLoading(false)
 
+        const userRef = doc(db, 'users', u.uid)
         try {
           const snap = await getDoc(userRef)
           if (!snap.exists()) {
-            // First time login - perform migration from local storage
+            // First time login - migrate from local storage
             const localCat = JSON.parse(localStorage.getItem('categories') || '[]')
             const localExp = JSON.parse(localStorage.getItem('expenses') || '[]')
             const localLoans = JSON.parse(localStorage.getItem('loans') || '[]')
@@ -97,7 +98,6 @@ function App() {
             })
           }
 
-          // Setup snapshot listener
           onSnapshot(userRef, (docSnap) => {
             const data = docSnap.data()
             if (data) {
@@ -111,8 +111,8 @@ function App() {
         }
       } else {
         setUser(null)
+        setAuthLoading(false)
       }
-      setAuthLoading(false)
     })
     return () => unsubscribe()
   }, [])
