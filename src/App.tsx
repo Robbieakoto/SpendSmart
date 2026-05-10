@@ -27,25 +27,17 @@ interface Loan {
 
 function App() {
 
-  const [categories, setCategories] = useState<Category[]>(() => {
-    const saved = localStorage.getItem('categories')
-    return saved ? JSON.parse(saved) : []
-  })
+  const [categories, setCategories] = useState<Category[]>([])
   const [newCategory, setNewCategory] = useState('')
   const [newCategoryBudget, setNewCategoryBudget] = useState('')
-  const [expenses, setExpenses] = useState<Expense[]>(() => {
-    const saved = localStorage.getItem('expenses')
-    return saved ? JSON.parse(saved) : []
-  })
+  const [expenses, setExpenses] = useState<Expense[]>([])
   const [newExpense, setNewExpense] = useState({ categoryId: 0, amount: '', date: '' })
-  const [loans, setLoans] = useState<Loan[]>(() => {
-    const saved = localStorage.getItem('loans')
-    return saved ? JSON.parse(saved) : []
-  })
+  const [loans, setLoans] = useState<Loan[]>([])
   const [newLoan, setNewLoan] = useState({ name: '', amount: '' })
 
   const [user, setUser] = useState<User | null>(null)
   const [authLoading, setAuthLoading] = useState(true)
+  const [dataLoading, setDataLoading] = useState(false)
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -77,57 +69,63 @@ function App() {
   }, [selectedMonth, selectedYear])
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (u) => {
+    let snapshotUnsub: (() => void) | null = null
+
+    const unsubscribeAuth = onAuthStateChanged(auth, async (u) => {
+      if (snapshotUnsub) {
+        snapshotUnsub()
+        snapshotUnsub = null
+      }
+
       if (u) {
         setUser(u)
+        setDataLoading(true)
         setAuthLoading(false)
 
         const userRef = doc(db, 'users', u.uid)
         try {
           const snap = await getDoc(userRef)
           if (!snap.exists()) {
-            // First time login - migrate from local storage
+            // One-time migration: push any existing localStorage data up to Firestore
             const localCat = JSON.parse(localStorage.getItem('categories') || '[]')
             const localExp = JSON.parse(localStorage.getItem('expenses') || '[]')
             const localLoans = JSON.parse(localStorage.getItem('loans') || '[]')
-
-            await setDoc(userRef, {
-              categories: localCat,
-              expenses: localExp,
-              loans: localLoans
-            })
+            await setDoc(userRef, { categories: localCat, expenses: localExp, loans: localLoans })
+            localStorage.removeItem('categories')
+            localStorage.removeItem('expenses')
+            localStorage.removeItem('loans')
           }
 
-          onSnapshot(userRef, (docSnap) => {
-            const data = docSnap.data()
-            if (data) {
-              setCategories(data.categories || [])
-              setExpenses(data.expenses || [])
-              setLoans(data.loans || [])
+          snapshotUnsub = onSnapshot(
+            userRef,
+            (docSnap) => {
+              const data = docSnap.data()
+              setCategories(data?.categories ?? [])
+              setExpenses(data?.expenses ?? [])
+              setLoans(data?.loans ?? [])
+              setDataLoading(false)
+            },
+            (error) => {
+              console.error('Snapshot error:', error)
+              setDataLoading(false)
             }
-          })
+          )
         } catch (error) {
-          console.error("Error setting up user data:", error)
+          console.error('Error setting up user data:', error)
+          setDataLoading(false)
         }
       } else {
         setUser(null)
         setAuthLoading(false)
+        setDataLoading(false)
       }
     })
-    return () => unsubscribe()
+
+    return () => {
+      unsubscribeAuth()
+      if (snapshotUnsub) snapshotUnsub()
+    }
   }, [])
-
-  useEffect(() => {
-    localStorage.setItem('categories', JSON.stringify(categories))
-  }, [categories])
-
-  useEffect(() => {
-    localStorage.setItem('expenses', JSON.stringify(expenses))
-  }, [expenses])
-
-  useEffect(() => {
-    localStorage.setItem('loans', JSON.stringify(loans))
-  }, [loans])
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -401,6 +399,10 @@ function App() {
         </div>
       </div>
     )
+  }
+
+  if (dataLoading) {
+    return <SplashScreen />
   }
 
   return (
