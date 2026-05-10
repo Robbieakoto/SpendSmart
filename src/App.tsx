@@ -177,9 +177,11 @@ function App() {
     localStorage.setItem('activeTab', activeTab)
   }, [activeTab])
 
-  const syncToCloud = async (updates: any) => {
+  const syncToCloud = (updates: any) => {
     if (user) {
-      await setDoc(doc(db, 'users', user.uid), updates, { merge: true })
+      setDoc(doc(db, 'users', user.uid), updates, { merge: true }).catch((err) =>
+        console.error('Cloud sync failed — will retry when online:', err)
+      )
     }
   }
 
