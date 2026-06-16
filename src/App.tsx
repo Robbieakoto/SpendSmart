@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, User } from 'firebase/auth'
-import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore'
+import { doc, getDocFromServer, setDoc, onSnapshot } from 'firebase/firestore'
 import { auth, db } from './firebase'
 import './App.css'
 import SplashScreen from './components/SplashScreen'
@@ -84,7 +84,7 @@ function App() {
 
         const userRef = doc(db, 'users', u.uid)
         try {
-          const snap = await getDoc(userRef)
+          const snap = await getDocFromServer(userRef)
           if (!snap.exists()) {
             // One-time migration: push any existing localStorage data up to Firestore
             const localCat = JSON.parse(localStorage.getItem('categories') || '[]')
