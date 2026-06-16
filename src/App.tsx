@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, User } from 'firebase/auth'
-import { doc, getDocFromServer, setDoc, onSnapshot } from 'firebase/firestore'
+import { doc, setDoc, onSnapshot } from 'firebase/firestore'
 import { auth, db } from './firebase'
 import './App.css'
 import SplashScreen from './components/SplashScreen'
@@ -71,7 +71,7 @@ function App() {
   useEffect(() => {
     let snapshotUnsub: (() => void) | null = null
 
-    const unsubscribeAuth = onAuthStateChanged(auth, async (u) => {
+    const unsubscribeAuth = onAuthStateChanged(auth, (u) => {
       if (snapshotUnsub) {
         snapshotUnsub()
         snapshotUnsub = null
@@ -83,39 +83,25 @@ function App() {
         setAuthLoading(false)
 
         const userRef = doc(db, 'users', u.uid)
-        try {
-          const snap = await getDocFromServer(userRef)
-          if (!snap.exists()) {
-            // One-time migration: push any existing localStorage data up to Firestore
-            const localCat = JSON.parse(localStorage.getItem('categories') || '[]')
-            const localExp = JSON.parse(localStorage.getItem('expenses') || '[]')
-            const localLoans = JSON.parse(localStorage.getItem('loans') || '[]')
-            await setDoc(userRef, { categories: localCat, expenses: localExp, loans: localLoans })
-            localStorage.removeItem('categories')
-            localStorage.removeItem('expenses')
-            localStorage.removeItem('loans')
+        snapshotUnsub = onSnapshot(
+          userRef,
+          (docSnap) => {
+            const data = docSnap.data()
+            setCategories(data?.categories ?? [])
+            setExpenses(data?.expenses ?? [])
+            setLoans(data?.loans ?? [])
+            setDataLoading(false)
+          },
+          (error) => {
+            console.error('Snapshot error:', error)
+            setDataLoading(false)
           }
-
-          snapshotUnsub = onSnapshot(
-            userRef,
-            (docSnap) => {
-              const data = docSnap.data()
-              setCategories(data?.categories ?? [])
-              setExpenses(data?.expenses ?? [])
-              setLoans(data?.loans ?? [])
-              setDataLoading(false)
-            },
-            (error) => {
-              console.error('Snapshot error:', error)
-              setDataLoading(false)
-            }
-          )
-        } catch (error) {
-          console.error('Error setting up user data:', error)
-          setDataLoading(false)
-        }
+        )
       } else {
         setUser(null)
+        setCategories([])
+        setExpenses([])
+        setLoans([])
         setAuthLoading(false)
         setDataLoading(false)
       }
